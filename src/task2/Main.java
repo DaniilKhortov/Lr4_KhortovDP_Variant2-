@@ -1,8 +1,9 @@
 package task2;
 
-import task1.Measure;
+
 
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
@@ -10,9 +11,13 @@ import java.util.concurrent.ExecutionException;
 
 public class Main {
     public static void main(String[] args) {
+
+        long startTimeSession= System.currentTimeMillis();
+
         CompletableFuture<Void> DeclareHeader = CompletableFuture.runAsync(() -> {
             long startTime = System.currentTimeMillis();
             System.out.println("Generating Array...");
+            Measure.addTime("DeclareHeader: "+ (System.currentTimeMillis()-startTime)+" ms");
             System.out.println("DeclareHeader: "+ (System.currentTimeMillis()-startTime)+" ms");
         });
 
@@ -21,6 +26,7 @@ public class Main {
         CompletableFuture<int[]> GenerateArray = CompletableFuture.supplyAsync(() -> {
             long startTime = System.currentTimeMillis();
             int[] integerArray = new int[20];
+            Measure.addTime("GenerateArray: "+ (System.currentTimeMillis()-startTime)+" ms");
             System.out.println("GenerateArray: "+ (System.currentTimeMillis()-startTime)+" ms");
             return integerArray;
         });
@@ -28,6 +34,7 @@ public class Main {
         CompletableFuture<int[]> CreateMeasures =GenerateArray.thenApplyAsync(integerArray -> {
             long startTime = System.currentTimeMillis();
             defineMeasures();
+            Measure.addTime("CreateMeasures: "+ (System.currentTimeMillis()-startTime)+" ms");
             System.out.println("CreateMeasures: "+ (System.currentTimeMillis()-startTime)+" ms");
             return integerArray;
         });
@@ -40,8 +47,8 @@ public class Main {
                 Random kaiserRandom = new Random();
                 integerArray[i] = kaiserRandom.nextInt(Measure.high+1- Measure.low)+ Measure.low;
             }
-
-            System.out.println(" FillArray: "+ (System.currentTimeMillis()-startTime)+" ms");
+            Measure.addTime("FillArray: "+ (System.currentTimeMillis()-startTime)+" ms");
+            System.out.println("FillArray: "+ (System.currentTimeMillis()-startTime)+" ms");
             return integerArray;
         });
 
@@ -51,6 +58,7 @@ public class Main {
             for(int i=0; i<integerArray.length; i++){
                 System.out.printf(integerArray[i]+" ");
             }
+            Measure.addTime("DisplayArray: "+ (System.currentTimeMillis()-startTime)+" ms");
             System.out.println("\nDisplayArray: "+ (System.currentTimeMillis()-startTime)+" ms");
         });
         CompletableFuture<Integer> FindMin= CreateMeasures.thenApplyAsync(integerArray -> {
@@ -66,6 +74,7 @@ public class Main {
             }
 
             System.out.println("Min: "+ min);
+            Measure.addTime("FindMin: "+ (System.currentTimeMillis()-startTime)+" ms");
             System.out.println("FindMin: "+ (System.currentTimeMillis()-startTime)+" ms");
             return min;
         });
@@ -81,6 +90,7 @@ public class Main {
 
             }
             System.out.println("Max: "+ max);
+            Measure.addTime("FindMax: "+ (System.currentTimeMillis()-startTime)+" ms");
             System.out.println("FindMax: "+ (System.currentTimeMillis()-startTime)+" ms");
             return max;
         });
@@ -101,8 +111,8 @@ public class Main {
                 throw new RuntimeException(e);
             }
 
-
-            System.out.println(" SumUp: "+ (System.currentTimeMillis()-startTime)+" ms");
+            Measure.addTime("SumUp: "+ (System.currentTimeMillis()-startTime)+" ms");
+            System.out.println("SumUp: "+ (System.currentTimeMillis()-startTime)+" ms");
 
         });
 
@@ -125,11 +135,27 @@ public class Main {
                     """;
             System.out.printf(art);
 
+            Measure.addTime("FinishTask2: "+ (System.currentTimeMillis()-startTime)+" ms");
             System.out.println("FinishTask2: "+ (System.currentTimeMillis()-startTime)+" ms");
         });
 
         System.out.println("Main Thread: end");
 
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            throw new IllegalStateException(e);
+        }
+
+
+        System.out.printf("\n-----------------------------------------------------------------------------------------\n");
+
+        System.out.printf("Total session time: %s ms\n",System.currentTimeMillis()-startTimeSession);
+        List<String> timeAsyncLocal = Measure.getTimeAsync();
+        for(int i=0; i<timeAsyncLocal.size(); i++){
+            System.out.println(timeAsyncLocal.get(i));
+            
+        }
     }
 
 
